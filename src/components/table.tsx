@@ -28,7 +28,7 @@ export default function Table<T>({ columns, data }: TableProps<T>) {
                     {data.map((item, rowIndex) => (
                         <tr key={rowIndex} className="hover:bg-gray-50 transition-colors duration-200 border-b">
                             {columns.map((col, colIndex) => (
-                                <td key={colIndex} className="p-4 text-gray-800 text-sm break-words">
+                                <td key={colIndex} className="p-4 w-36 text-gray-800 text-sm break-words">
                                     {col.render ? col.render(item) : (item[col.accessor] as string | number)}
                                 </td>
                             ))}

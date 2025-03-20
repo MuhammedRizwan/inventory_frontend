@@ -54,7 +54,7 @@ export default function CustomerLedger() {
         if (selectedCustomerId) {
             const customerTxns = transactions.filter(t => t.customerId === selectedCustomerId);
             setFilteredTransactions(customerTxns);
-            
+
             // Set customer details
             const customer = customers.find(c => c.id === selectedCustomerId) || null;
             setCustomerDetails(customer);
@@ -67,8 +67,8 @@ export default function CustomerLedger() {
     const columns = [
         { header: "Date", accessor: "date" as keyof Transaction },
         { header: "Description", accessor: "description" as keyof Transaction },
-        { 
-            header: "Type", 
+        {
+            header: "Type",
             accessor: "type" as keyof Transaction,
             render: (transaction: Transaction) => {
                 const typeClasses = {
@@ -83,8 +83,8 @@ export default function CustomerLedger() {
                 );
             }
         },
-        { 
-            header: "Status", 
+        {
+            header: "Status",
             accessor: "status" as keyof Transaction,
             render: (transaction: Transaction) => {
                 const statusClasses = {
@@ -99,15 +99,15 @@ export default function CustomerLedger() {
                 );
             }
         },
-        { 
-            header: "Amount", 
+        {
+            header: "Amount",
             accessor: "amount" as keyof Transaction,
             render: (transaction: Transaction) => {
-                const prefix = transaction.type === 'payment' ? '-' : 
-                               transaction.type === 'refund' ? '-' : '';
-                return <span className={transaction.type === 'payment' ? 'text-red-600' : 
-                                         transaction.type === 'refund' ? 'text-red-600' : 
-                                         'text-green-600'}>
+                const prefix = transaction.type === 'payment' ? '-' :
+                    transaction.type === 'refund' ? '-' : '';
+                return <span className={transaction.type === 'payment' ? 'text-red-600' :
+                    transaction.type === 'refund' ? 'text-red-600' :
+                        'text-green-600'}>
                     {prefix}${transaction.amount.toFixed(2)}
                 </span>;
             }
@@ -116,23 +116,23 @@ export default function CustomerLedger() {
 
     const handleFilter = () => {
         if (!selectedCustomerId) return;
-        
+
         const customerTxns = transactions.filter(t => {
             if (t.customerId !== selectedCustomerId) return false;
-            
+
             const txnDate = new Date(t.date);
             const filterStartDate = startDate ? new Date(startDate) : new Date(0);
             const filterEndDate = endDate ? new Date(endDate) : new Date(8640000000000000);
-            
+
             return txnDate >= filterStartDate && txnDate <= filterEndDate;
         });
-        
+
         setFilteredTransactions(customerTxns);
     };
 
     const calculateBalance = () => {
         if (!filteredTransactions.length) return 0;
-        
+
         return filteredTransactions.reduce((balance, transaction) => {
             if (transaction.type === 'purchase') {
                 return balance + transaction.amount;
@@ -144,7 +144,7 @@ export default function CustomerLedger() {
 
     const handlePrint = () => {
         if (!customerDetails) return;
-        
+
         const printWindow = window.open('', '_blank');
         if (printWindow) {
             printWindow.document.write('<html><head><title>Customer Ledger</title>');
@@ -168,14 +168,14 @@ export default function CustomerLedger() {
                 printWindow.document.write(`<p>Period: ${startDate || 'All time'} to ${endDate || 'Present'}</p>`);
             }
             printWindow.document.write('</div>');
-            
+
             // Customer Details
             printWindow.document.write('<div class="customer-details">');
             printWindow.document.write(`<h2>${customerDetails.name}</h2>`);
             printWindow.document.write(`<p>Email: ${customerDetails.email}</p>`);
             printWindow.document.write(`<p>Phone: ${customerDetails.phone}</p>`);
             printWindow.document.write('</div>');
-            
+
             // Transactions Table
             printWindow.document.write('<table>');
             printWindow.document.write('<thead><tr>');
@@ -183,16 +183,16 @@ export default function CustomerLedger() {
                 printWindow.document.write(`<th>${col.header}</th>`);
             });
             printWindow.document.write('</tr></thead>');
-            
+
             printWindow.document.write('<tbody>');
             filteredTransactions.forEach(transaction => {
                 printWindow.document.write('<tr>');
                 columns.forEach(col => {
                     if (col.header === "Amount") {
-                        const prefix = transaction.type === 'payment' ? '-' : 
-                                      transaction.type === 'refund' ? '-' : '';
-                        const amountClass = transaction.type === 'payment' || transaction.type === 'refund' ? 
-                                           'payment' : 'purchase';
+                        const prefix = transaction.type === 'payment' ? '-' :
+                            transaction.type === 'refund' ? '-' : '';
+                        const amountClass = transaction.type === 'payment' || transaction.type === 'refund' ?
+                            'payment' : 'purchase';
                         printWindow.document.write(`<td class="${amountClass}">${prefix}$${transaction.amount.toFixed(2)}</td>`);
                     } else if (col.header === "Type") {
                         printWindow.document.write(`<td>${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}</td>`);
@@ -206,11 +206,11 @@ export default function CustomerLedger() {
             });
             printWindow.document.write('</tbody>');
             printWindow.document.write('</table>');
-            
+
             // Balance
             const balance = calculateBalance();
             printWindow.document.write(`<div class="balance">Current Balance: $${balance.toFixed(2)}</div>`);
-            
+
             printWindow.document.write('</body></html>');
             printWindow.document.close();
             printWindow.print();
@@ -219,24 +219,24 @@ export default function CustomerLedger() {
 
     const handleExportExcel = () => {
         if (!customerDetails) return;
-        
+
         // Create CSV content
         let csvContent = "data:text/csv;charset=utf-8,";
-        
+
         // Add customer details
         csvContent += `Customer Name,${customerDetails.name}\r\n`;
         csvContent += `Email,${customerDetails.email}\r\n`;
         csvContent += `Phone,${customerDetails.phone}\r\n\r\n`;
-        
+
         // Add headers
         csvContent += columns.map(col => col.header).join(",") + "\r\n";
-        
+
         // Add rows
         filteredTransactions.forEach(transaction => {
             const rowData = columns.map(col => {
                 if (col.header === "Amount") {
-                    const prefix = transaction.type === 'payment' ? '-' : 
-                                  transaction.type === 'refund' ? '-' : '';
+                    const prefix = transaction.type === 'payment' ? '-' :
+                        transaction.type === 'refund' ? '-' : '';
                     return `${prefix}$${transaction.amount.toFixed(2)}`;
                 } else if (col.header === "Type" || col.header === "Status") {
                     return (transaction[col.accessor] as string).charAt(0).toUpperCase() + (transaction[col.accessor] as string).slice(1);
@@ -246,10 +246,10 @@ export default function CustomerLedger() {
             });
             csvContent += rowData.join(",") + "\r\n";
         });
-        
+
         // Add balance row
         csvContent += `\r\nCurrent Balance,$${calculateBalance().toFixed(2)}\r\n`;
-        
+
         // Create download link
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
@@ -266,25 +266,25 @@ export default function CustomerLedger() {
 
     const handleEmail = () => {
         if (!customerDetails) return;
-        
+
         // Create email body with customer details and transactions
         let emailBody = `Customer Ledger for ${customerDetails.name}\n`;
         emailBody += `Email: ${customerDetails.email}\n`;
         emailBody += `Phone: ${customerDetails.phone}\n\n`;
-        
+
         if (startDate || endDate) {
             emailBody += `Period: ${startDate || 'All time'} to ${endDate || 'Present'}\n\n`;
         }
-        
+
         // Table headers
         emailBody += columns.map(col => col.header).join("\t") + "\n";
-        
+
         // Table rows
         filteredTransactions.forEach(transaction => {
             const rowData = columns.map(col => {
                 if (col.header === "Amount") {
-                    const prefix = transaction.type === 'payment' ? '-' : 
-                                  transaction.type === 'refund' ? '-' : '';
+                    const prefix = transaction.type === 'payment' ? '-' :
+                        transaction.type === 'refund' ? '-' : '';
                     return `${prefix}$${transaction.amount.toFixed(2)}`;
                 } else if (col.header === "Type" || col.header === "Status") {
                     return (transaction[col.accessor] as string).charAt(0).toUpperCase() + (transaction[col.accessor] as string).slice(1);
@@ -294,24 +294,23 @@ export default function CustomerLedger() {
             });
             emailBody += rowData.join("\t") + "\n";
         });
-        
+
         // Balance
         emailBody += `\nCurrent Balance: $${calculateBalance().toFixed(2)}`;
-        
+
         // Encode for mailto
         const mailtoLink = `mailto:?subject=Customer Ledger for ${customerDetails.name}&body=${encodeURIComponent(emailBody)}`;
         window.location.href = mailtoLink;
     };
 
     return (
-        <div className="p-6 min-h-screen">
+        <div className="p-6 min-h-screen text-black text-sm">
             <div className="w-full max-w-6xl mx-auto p-6 bg-white rounded-xl shadow-lg">
                 <h1 className="text-2xl font-bold text-gray-800 mb-6">👤 Customer Ledger</h1>
-                
-                {/* Customer Selection */}
+
                 <div className="mb-6 p-4 bg-gray-100 rounded-lg">
                     <label className="block text-sm font-medium text-gray-700 mb-2">Select Customer</label>
-                    <select 
+                    <select
                         value={selectedCustomerId || ''}
                         onChange={(e) => setSelectedCustomerId(e.target.value ? parseInt(e.target.value) : null)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -324,10 +323,9 @@ export default function CustomerLedger() {
                         ))}
                     </select>
                 </div>
-                
+
                 {customerDetails && (
                     <>
-                        {/* Customer Details Card */}
                         <div className="mb-6 p-4 bg-white border rounded-lg shadow">
                             <h2 className="text-xl font-semibold mb-2">{customerDetails.name}</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
@@ -339,76 +337,77 @@ export default function CustomerLedger() {
                                 </div>
                             </div>
                         </div>
-                    
-                        {/* Date Filter Controls */}
-                        <div className="mb-6 p-4 bg-gray-100 rounded-lg flex flex-wrap gap-4 items-end">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                                <input 
-                                    type="date" 
-                                    value={startDate} 
-                                    onChange={(e) => setStartDate(e.target.value)}
-                                    className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                />
+
+                        <div className="mb-2 p-4 bg-gray-100 rounded-lg flex flex-wrap gap-4 items-end justify-between">
+                            <div className="flex flex-wrap gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                                    <input
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                        className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                                    <input
+                                        type="date"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                        className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    />
+                                </div>
+                                <div className="flex items-end">
+                                <button
+                                    onClick={handleFilter}
+                                    className="px-4 py-2 bg-indigo-600  font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    >
+                                    Apply Filter
+                                </button>
+                                    </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                                <input 
-                                    type="date" 
-                                    value={endDate} 
-                                    onChange={(e) => setEndDate(e.target.value)}
-                                    className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                />
+
+                            <div className="flex flex-wrap gap-3 items-end">
+                                <button
+                                    onClick={handlePrint}
+                                    className="px-4 py-2 bg-gray-600  font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 flex items-center"
+                                >
+                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                    </svg>
+                                    Print
+                                </button>
+                                <button
+                                    onClick={handleExportPDF}
+                                    className="px-4 py-2 bg-red-600  font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 flex items-center"
+                                >
+                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                    Export PDF
+                                </button>
+                                <button
+                                    onClick={handleExportExcel}
+                                    className="px-4 py-2 bg-green-600  font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center"
+                                >
+                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Export Excel
+                                </button>
+                                <button
+                                    onClick={handleEmail}
+                                    className="px-4 py-2 bg-blue-600  font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
+                                >
+                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    Email
+                                </button>
                             </div>
-                            <button 
-                                onClick={handleFilter}
-                                className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            >
-                                Apply Filter
-                            </button>
                         </div>
-                        
-                        {/* Export Controls */}
-                        <div className="mb-6 flex flex-wrap gap-3">
-                            <button 
-                                onClick={handlePrint}
-                                className="px-4 py-2 bg-gray-600 text-white font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 flex items-center"
-                            >
-                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                                </svg>
-                                Print
-                            </button>
-                            <button 
-                                onClick={handleExportPDF}
-                                className="px-4 py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 flex items-center"
-                            >
-                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                </svg>
-                                Export PDF
-                            </button>
-                            <button 
-                                onClick={handleExportExcel}
-                                className="px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center"
-                            >
-                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                Export Excel
-                            </button>
-                            <button 
-                                onClick={handleEmail}
-                                className="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
-                            >
-                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                                Email
-                            </button>
-                        </div>
-                        
-                        {/* Transactions Table */}
+
                         <div className="mb-6" ref={tableRef}>
                             {filteredTransactions.length > 0 ? (
                                 <Table columns={columns} data={filteredTransactions} />
@@ -418,8 +417,7 @@ export default function CustomerLedger() {
                                 </div>
                             )}
                         </div>
-                        
-                        {/* Balance Summary */}
+
                         {filteredTransactions.length > 0 && (
                             <div className="mt-6 p-4 bg-gray-100 rounded-lg">
                                 <div className="flex justify-between items-center">
@@ -439,7 +437,7 @@ export default function CustomerLedger() {
                         )}
                     </>
                 )}
-                
+
                 {!selectedCustomerId && (
                     <div className="text-center py-12 bg-gray-50 rounded-lg">
                         <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

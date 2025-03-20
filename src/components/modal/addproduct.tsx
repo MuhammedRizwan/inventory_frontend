@@ -1,95 +1,109 @@
-import { FormEvent, useState } from "react";
-import { Product } from "../product/productlist";
+import Iproduct from "@/interface/product";
+import { add_product } from "@/service/product.service";
+import { RootState } from "@/store/persist_store";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
 
 
 interface AddProductProps {
-    products: Product[];
+    products: Iproduct[];
     setIsModalOpen: (open: boolean) => void;
-    setProducts: (products: Product[]) => void;
+    setProducts: (products: Iproduct[]) => void;
 }
 
 export default function AddProduct({ products, setIsModalOpen, setProducts }: AddProductProps) {
-    const [newProduct, setNewProduct] = useState({
-        name: "",
-        description: "",
-        quantity: "",
-        price: "",
-    });
+    const user=useSelector((state:RootState)=>state.user.user)
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset,
+    } = useForm<Iproduct>();
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setNewProduct(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleAddProduct = (e:FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        if (!newProduct.name || !newProduct.description || !newProduct.quantity || !newProduct.price) {
-            alert("All fields are required!");
-            return;
+    const onSubmit = async(data: Iproduct) => {
+        try {
+            const response=await add_product(user?._id,data)
+            if(response.success){
+                setProducts([ response.data,...products]);
+                setIsModalOpen(false);
+                reset();
+                toast.success(response.message)
+            }
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+            toast.error(errorMessage);
         }
-
-        const productToAdd: Product = {
-            id: products.length ? products[products.length - 1].id + 1 : 1,
-            name: newProduct.name,
-            description: newProduct.description,
-            quantity: Number(newProduct.quantity),
-            price: Number(newProduct.price),
-        };
-
-        setProducts([...products, productToAdd]);
-        setIsModalOpen(false);
-        setNewProduct({ name: "", description: "", quantity: "", price: "" });
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
             <div className="bg-white p-6 rounded-lg shadow-lg w-96">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Add New Product</h2>
 
-                <form className="w-full space-y-3" onSubmit={handleAddProduct}>
+                <form className="w-full space-y-2" onSubmit={handleSubmit(onSubmit)}>
                     <div className="flex flex-col">
                         <label className="text-gray-700 font-semibold text-sm mb-1">Product Name</label>
                         <input
                             type="text"
-                            name="name"
+                            {...register("name", { required: "Product name is required" })}
                             className="w-full text-black text-sm px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:outline-none shadow-md"
-                            placeholder="Enter your name"
+                            placeholder="Enter product name"
                         />
+                        <span className="text-red-500 text-xs h-4">{errors.name?.message || " "}</span>
                     </div>
+
                     <div className="flex flex-col">
-                        <label className="text-gray-700 font-semibold text-sm mb-1">description</label>
+                        <label className="text-gray-700 font-semibold text-sm mb-1">Description</label>
                         <textarea
-                            name="description"
+                            {...register("description", {
+                                required: "Description is required",
+                                minLength: { value: 5, message: "Description must be at least 5 characters" },
+                            })}
                             className="w-full text-black text-sm px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:outline-none shadow-md"
-                            placeholder="Enter your description"
+                            placeholder="Enter description"
                         />
+                        <span className="text-red-500 text-xs h-4 block">{errors.description?.message ||" "}</span>
                     </div>
+
                     <div className="flex flex-col">
-                        <label className="text-gray-700 font-semibold text-sm mb-1">price</label>
+                        <label className="text-gray-700 font-semibold text-sm mb-1">Price</label>
+                        <input
+                            type="number"
+                            {...register("price", {
+                                required: "Price is required",
+                                min: { value: 1, message: "Price must be greater than 0" },
+                                validate: (value) => !isNaN(value) || "Price must be a number",
+                            })}
+                            className="w-full text-black text-sm px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:outline-none shadow-md"
+                            placeholder="Enter price"
+                        />
+                        <span className="text-red-500 text-xs h-4">{errors.price?.message ||""}</span>
+                    </div>
+
+                    <div className="flex flex-col">
+                        <label className="text-gray-700 font-semibold text-sm mb-1">Quantity</label>
                         <input
                             type="text"
-                            name="description"
+                            {...register("quantity", {
+                                required: "Quantity is required",
+                                min: { value: 1, message: "Quantity must be at least 1" },
+                                validate: (value) => !isNaN(value) || "Quantity must be a number",
+                            })}
                             className="w-full text-black text-sm px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:outline-none shadow-md"
-                            placeholder="Enter your price"
+                            placeholder="Enter quantity"
                         />
+                        <span className="text-red-500 text-xs h-4">{errors.quantity?.message || " "}</span>
                     </div>
-                    <div className="flex flex-col">
-                        <label className="text-gray-700 font-semibold text-sm mb-1">quatity</label>
-                        <input
-                            type="text"
-                            name="quatity"
-                            className="w-full text-black text-sm px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:outline-none shadow-md"
-                            placeholder="Enter your quatity"
-                        />
-                    </div>
+
                     <button
                         type="submit"
-                        className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition duration-300 shadow-md"
+                        className="w-full bg-green-600  py-2 rounded-md hover:bg-green-700 transition duration-300 shadow-md"
                     >
                         Add
                     </button>
                 </form>
             </div>
-        </div >
+        </div>
     );
 }

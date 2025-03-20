@@ -1,98 +1,105 @@
-import { FormEvent, useState } from "react";
-import { Customer } from "../customer/customerlist";
-
+import Icustomer from "@/interface/customer";
+import { add_customer } from "@/service/customer.service";
+import { RootState } from "@/store/persist_store";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
 
 
 interface AddCustomerProps {
-    customers: Customer[];
+    customers: Icustomer[];
     setIsModalOpen: (open: boolean) => void;
-    setCustomers: (customers: Customer[]) => void;
+    setCustomers: (customers: Icustomer[]) => void;
 }
 
+
 export default function AddCustomer({ customers, setIsModalOpen, setCustomers }: AddCustomerProps) {
-    const [newCustomer, setNewCustomer] = useState({
-        name: "",
-        email: "",
-        phone: "",
-        address: "",
-    });
+    const user =useSelector((state:RootState)=>state.user.user)
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors },
+    } = useForm<Icustomer>();
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setNewCustomer(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleAddCustomer = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if (!newCustomer.name || !newCustomer.email || !newCustomer.phone || !newCustomer.address) {
-            alert("All fields are required!");
-            return;
+    const onSubmit = async(data: Icustomer) => {
+        try {
+            const response=await add_customer(user?._id,data)
+            if(response.success){
+                setCustomers([ response.data,...customers]);
+                setIsModalOpen(false);
+                reset();
+                toast.success(response.message)
+            }
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+            toast.error(errorMessage);
         }
-
-        const customerToAdd: Customer = {
-            id: customers.length ? customers[customers.length - 1].id + 1 : 1,
-            name: newCustomer.name,
-            number: newCustomer.phone,
-            address: newCustomer.address,
-        };
-
-        setCustomers([...customers, customerToAdd]);
-        setIsModalOpen(false);
-        setNewCustomer({ name: "", email: "", phone: "", address: "" });
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
             <div className="bg-white p-6 rounded-lg shadow-lg w-96">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Add New Customer</h2>
 
-                <form className="w-full space-y-3" onSubmit={handleAddCustomer}>
+                <form className="w-full space-y-1" onSubmit={handleSubmit(onSubmit)}>
+                    {/** Name Field */}
                     <div className="flex flex-col">
                         <label className="text-gray-700 font-semibold text-sm mb-1">Customer Name</label>
                         <input
                             type="text"
-                            name="name"
-                            value={newCustomer.name}
-                            onChange={handleChange}
+                            {...register("name", { required: "Customer name is required" })}
                             className="w-full text-black text-sm px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:outline-none shadow-md"
                             placeholder="Enter customer name"
                         />
+                        <p className="text-red-500 text-xs mt-1 h-4">{errors.name?.message || " "}</p>
                     </div>
+
+                    {/** Email Field */}
                     <div className="flex flex-col">
                         <label className="text-gray-700 font-semibold text-sm mb-1">Email</label>
                         <input
                             type="email"
-                            name="email"
-                            value={newCustomer.email}
-                            onChange={handleChange}
+                            {...register("email", {
+                                required: "Email is required",
+                                pattern: { value: /^[^@ ]+@[^@ ]+\.[^@ ]+$/, message: "Invalid email format" },
+                            })}
                             className="w-full text-black text-sm px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:outline-none shadow-md"
                             placeholder="Enter email"
                         />
+                        <p className="text-red-500 text-xs mt-1 h-4">{errors.email?.message || " "}</p>
                     </div>
+
+                    {/** Phone Field */}
                     <div className="flex flex-col">
                         <label className="text-gray-700 font-semibold text-sm mb-1">Phone</label>
                         <input
                             type="tel"
-                            name="phone"
-                            value={newCustomer.phone}
-                            onChange={handleChange}
+                            {...register("mobile", {
+                                required: "Phone number is required",
+                                pattern: { value: /^[0-9]{10}$/, message: "Invalid phone number" },
+                            })}
                             className="w-full text-black text-sm px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:outline-none shadow-md"
                             placeholder="Enter phone number"
                         />
+                        <p className="text-red-500 text-xs mt-1 h-4">{errors.mobile?.message || " "}</p>
                     </div>
+
+                    {/** Address Field */}
                     <div className="flex flex-col">
                         <label className="text-gray-700 font-semibold text-sm mb-1">Address</label>
                         <textarea
-                            name="address"
-                            value={newCustomer.address}
-                            onChange={handleChange}
+                            {...register("address", { required: "Address is required" })}
                             className="w-full text-black text-sm px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-500 focus:outline-none shadow-md"
                             placeholder="Enter address"
                         />
+                        <p className="text-red-500 text-xs mt-1 h-4">{errors.address?.message || " "}</p>
                     </div>
+
+                    {/** Submit Button */}
                     <button
                         type="submit"
-                        className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition duration-300 shadow-md"
+                        className="w-full bg-green-600  py-2 rounded-md hover:bg-green-700 transition duration-300 shadow-md"
                     >
                         Add Customer
                     </button>

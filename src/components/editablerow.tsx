@@ -35,13 +35,13 @@ export default function EditableRow<T extends Record<string, any>>({ item, onSav
             <td className="p-4 text-center">
                 <button
                     onClick={handleSave}
-                    className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors duration-200 shadow-md"
+                    className="bg-green-500  px-4 py-2 rounded-lg hover:bg-green-600 transition-colors duration-200 shadow-md"
                 >
                     Save
                 </button>
                 <button
                     onClick={onCancel}
-                    className="ml-2 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 shadow-md"
+                    className="ml-2 bg-gray-500  px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors duration-200 shadow-md"
                 >
                     Cancel
                 </button>
