@@ -1,40 +1,77 @@
-'use client'
-import { useState } from "react";
+"use client";
+import { useEffect, useState } from "react";
 import Table, { Column } from "../table";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/persist_store";
+import { fetch_purchase } from "@/service/purchase.service";
+import toast from "react-hot-toast";
+import { Purchase } from "@/interface/purchase";
+import LoadingSpinner from "../loading/spinner";
 
 
-export interface Purchase {
-    date: string;
-    customer: string;
-    product: string;
-    price: number;
-    quantity: number;
-    payment: "Cash" | "Bank";
-}
 
-const initialData: Purchase[] = [
-    { date: "2024-03-18", customer: "Alice", product: "Laptop", price: 1000, quantity: 1, payment: "Cash" },
-    { date: "2024-03-19", customer: "Bob", product: "Mouse", price: 50, quantity: 2, payment: "Bank" },
-];
 export default function PurchaseList() {
-    const [data, setData] = useState<Purchase[]>(initialData);
+    const user = useSelector((state: RootState) => state.user.user);
+    const [data, setData] = useState<Purchase[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+
+    const fetchPurchaseData = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch_purchase(user?._id);
+            if (response.success) {
+                setData(response.data);
+            } else {
+                toast.error(response.message || "Failed to fetch purchases");
+            }
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+            toast.error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (user?._id) {
+            fetchPurchaseData();
+        }
+    }, [user?._id]);
 
     const columns: Column<Purchase>[] = [
-        { accessor: "date", header: "Date" },
-        { accessor: "customer", header: "Customer" },
-        { accessor: "product", header: "Product" },
+        {
+            accessor: "date",
+            header: "Date",
+            render: (row: Purchase) => <span>{new Date(row.date).toLocaleDateString()}</span>,
+        },
+        {
+            accessor: "customer",
+            header: "Customer",
+            render: (row: Purchase) => <span>{row.customer.name}</span>,
+        },
+        {
+            accessor: "product",
+            header: "Product",
+            render: (row: Purchase) => <span>{row.product.name}</span>,
+        },
         {
             accessor: "price",
             header: "Price",
-            render: (row: Purchase) => <span>{`$${row.price}`}</span>,
+            render: (row: Purchase) => <span>${row.price.toFixed(2)}</span>,
         },
-        { accessor: "quantity", header: "Quantity" },
+        {
+            accessor: "quantity",
+            header: "Quantity",
+        },
         {
             header: "Total",
-            render: (row: Purchase) => <span>{`$${row.price * row.quantity}`}</span>,
-            accessor: "date",
+            render: (row: Purchase) => <span>${(row.price * row.quantity).toFixed(2)}</span>,
+            accessor: "_id"
         },
-        { accessor: "payment", header: "Payment" },
+        {
+            accessor: "payment",
+            header: "Payment",
+        },
     ];
 
     return (
@@ -43,7 +80,15 @@ export default function PurchaseList() {
                 <div className="flex justify-between m-2">
                     <h2 className="text-xl font-bold text-gray-800">📦 Purchase List</h2>
                 </div>
-                <Table columns={columns} data={data} />
+                {loading ? (
+                    <div className="flex items-center justify-center min-h-screen">
+                        <LoadingSpinner />
+                    </div>
+                ) : data.length === 0 ? (
+                    <div className="text-center text-gray-500">No purchases found.</div>
+                ) : (
+                    <Table columns={columns} data={data} />
+                )}
             </div>
         </div>
     );

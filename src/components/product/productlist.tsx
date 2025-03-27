@@ -74,7 +74,7 @@ export default function ProductList() {
                 const response = await edit_product(updatedProduct);
                 if (response.success) {
                     setProducts(products.map(product =>
-                        product._id === editingId ? { ...product, ...data } : product
+                        product._id === editingId ? { ...product, ...response.data } : product
                     ));
                     setEditingId(null);
                     toast.success(response.message);
@@ -153,7 +153,7 @@ export default function ProductList() {
                         <p className="text-red-500 text-xs h-2">{errors.price?.message || " "}</p>
                     </>
                 ) : (
-                    <>{product.price}</>
+                    <>${product.price.toFixed(2)}</>
                 )
             )
         },

@@ -1,4 +1,5 @@
 import Navbar from "@/components/navbar/navbar";
+import ProtectedRoute from "@/components/protectRoute/protected_route";
 import type { Metadata } from "next";
 
 
@@ -15,9 +16,10 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body>
-                <Navbar />
-                {children}
-
+                <ProtectedRoute>
+                    <Navbar />
+                    {children}
+                </ProtectedRoute>
             </body>
         </html>
     );

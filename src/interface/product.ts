@@ -5,4 +5,5 @@ export default interface Iproduct {
     description: string;
     quantity: number;
     price: number;
+    createdAt?:Date
 }

@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store/persist_store";
 import toast from "react-hot-toast";
 import { delete_customer, edit_customer, fetch_customer } from "@/service/customer.service";
+import LoadingSpinner from "../loading/spinner";
 
 
 
@@ -137,7 +138,7 @@ export default function CustomerList() {
                                 pattern: { value: /^[0-9]{10}$/, message: "Invalid phone number" },
                             })}
                             className="w-full text-gray-800 p-2 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            />
+                        />
                         <p className="text-red-500 text-xs h-2">{errors.mobile?.message || " "}</p>
                     </>
                 ) : (
@@ -217,7 +218,9 @@ export default function CustomerList() {
                 </div>
 
                 {isPending ? (
-                    <p className="text-center text-gray-500">Loading customers...</p>
+                    <div className="flex items-center justify-center min-h-screen">
+                        <LoadingSpinner />
+                    </div>
                 ) : (
                     <Table columns={columns} data={customers} />
                 )}

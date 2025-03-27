@@ -1,34 +1,29 @@
+import { store } from "@/store/persist_store";
+import { clearUser } from "@/store/userslice";
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
 });
-
-axiosInstance.interceptors.request.use(
-  (config) => {
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 401) {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 || error.response?.status === 403 && !originalRequest._retry) {
+      originalRequest._retry = true;
       try {
-        // Try refreshing token
-        await axiosInstance.get("/auth/refresh-token");
-        return axiosInstance(error.config); // Retry failed request
+        await axiosInstance.post('/refresh');
+        return axiosInstance(originalRequest);
       } catch (refreshError) {
-        console.error("Session expired. Redirecting to login...");
-        if (typeof window !== "undefined") {
-          window.location.href = "/";
-        }
+        window.location.href = '/';
+        store.dispatch(clearUser())
+        return Promise.reject(refreshError);
       }
     }
+
     return Promise.reject(error);
   }
 );
