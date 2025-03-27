@@ -164,7 +164,6 @@ export default function Dashboard() {
             <div className="max-w-7xl mx-auto">
                 <h1 className="text-3xl font-bold text-white mb-6">📊 Inventory Management Dashboard</h1>
 
-                {/* Company Details */}
                 <div className="bg-white text-black p-6 rounded-lg shadow-md mb-6">
                     <h2 className="text-xl font-semibold text-gray-700 mb-4">Company Details</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

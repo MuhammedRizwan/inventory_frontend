@@ -46,10 +46,10 @@ export const emailReport = <T>(
                 : col.accessor in item
                 ? item[col.accessor]
                 : "";
-            const strValue = String(value ?? ""); // Ensure string, handle null/undefined
+            const strValue = String(value ?? ""); 
             return Math.max(max, strValue.length);
         }, 0);
-        return Math.max(headerWidth, maxDataWidth) + 2; // Add padding
+        return Math.max(headerWidth, maxDataWidth) + 2; 
     });
 
     // Build email body

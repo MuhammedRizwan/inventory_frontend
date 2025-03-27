@@ -16,7 +16,6 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isReportOpen, setIsReportOpen] = useState<boolean>(false);
   const [isPurchaseOpen, setIsPurchaseOpen] = useState<boolean>(false);
-  const [isMobileReportOpen, setIsMobileReportOpen] = useState<boolean>(false);
   const [isMobilePurchaseOpen, setIsMobilePurchaseOpen] = useState<boolean>(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);

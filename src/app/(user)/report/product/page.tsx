@@ -35,7 +35,7 @@ export default function ProductReport() {
 
     useEffect(() => {
         fetchProductData();
-    }, [user?._id]);
+    }, []);
 
     const columns = [
         { header: "ID", accessor: "id" as keyof Iproduct },

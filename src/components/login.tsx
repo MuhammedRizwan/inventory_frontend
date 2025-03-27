@@ -18,9 +18,9 @@ export default function Login() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm<{email:string,password:string}>();
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data:{email:string,password:string}) => {
     setIsLoading(true)
     try {
       const response = await login(data)

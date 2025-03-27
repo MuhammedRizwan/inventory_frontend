@@ -39,7 +39,7 @@ export default function CustomerList() {
                 toast.error(errorMessage);
             }
         });
-    }, []);
+    },[user?._id]);
 
     const handleDelete = async (customerId: string) => {
         const confirmDelete = window.confirm('Are you sure you want to delete this customer?');

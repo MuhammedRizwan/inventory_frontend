@@ -37,7 +37,7 @@ export default function ProductList() {
                 toast.error(errorMessage);
             }
         });
-    }, []);
+    }, [user?._id]);
 
     const handleDelete = async (id: string) => {
         const confirmDelete = window.confirm('Are you sure you want to delete this product?');
