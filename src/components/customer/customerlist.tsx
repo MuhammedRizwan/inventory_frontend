@@ -121,7 +121,7 @@ export default function CustomerList() {
                         <p className="text-red-500 text-xs h-2">{errors.email?.message || " "}</p>
                     </>
                 ) : (
-                    <>{customer.address}</>
+                    <>{customer.email}</>
                 )
             )
         },
