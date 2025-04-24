@@ -77,7 +77,7 @@ export default function CustomerLedger() {
         {
             header: "Product",
             accessor: "product" as keyof Purchase,
-            render: (transaction: Purchase) => <span>{transaction.product.name}</span>,
+            render: (transaction: Purchase) => <span>{transaction.product?.name}</span>,
         },
         {
             header: "Price",

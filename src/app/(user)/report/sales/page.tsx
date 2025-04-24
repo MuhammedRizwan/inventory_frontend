@@ -47,12 +47,12 @@ export default function SalesReport() {
         { 
             accessor: "customer", 
             header: "Customer",
-            render: (row: Purchase) => <span>{row.customer.name}</span> 
+            render: (row: Purchase) => <span>{row.customer?.name}</span> 
         },
         { 
             accessor: "product", 
             header: "Product",
-            render: (row: Purchase) => <span>{row.product.name}</span> 
+            render: (row: Purchase) => <span>{row.product?.name}</span> 
         },
         {
             accessor: "price",

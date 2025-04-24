@@ -47,17 +47,17 @@ export default function PurchaseList() {
         {
             accessor: "customer",
             header: "Customer",
-            render: (row: Purchase) => <span>{row.customer.name}</span>,
+            render: (row: Purchase) => <span>{row.customer?.name}</span>,
         },
         {
             accessor: "product",
             header: "Product",
-            render: (row: Purchase) => <span>{row.product.name}</span>,
+            render: (row: Purchase) => <span>{row.product?.name}</span>,
         },
         {
             accessor: "price",
             header: "Price",
-            render: (row: Purchase) => <span>${row.price.toFixed(2)}</span>,
+            render: (row: Purchase) => <span>${row?.price.toFixed(2)}</span>,
         },
         {
             accessor: "quantity",
@@ -88,6 +88,7 @@ export default function PurchaseList() {
                     <div className="text-center text-gray-500">No purchases found.</div>
                 ) : (
                     <Table columns={columns} data={data} />
+
                 )}
             </div>
         </div>
